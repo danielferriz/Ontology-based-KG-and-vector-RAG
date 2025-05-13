@@ -1,0 +1,44 @@
+# first step parameters
+## LOGGING CONFIG
+# logging_level must be one of [ DEBUG, INFO, WARNING, ERROR, CRITICAL ]. 
+# Capital letters only. 
+# Default value: INFO
+logging_level: "DEBUG"
+# log_file must contain only alphanumerical values. 
+# Default value: newLog
+log_file: "pgMemgraph"
+## Text chunks config
+chunk_overlap_ratio: 0.10
+## LM Studio
+llm_max_tokens: 8020
+llm_tokens_per_100_characters: 30
+llm_len_prompt_engineering: 2000
+llm_embedding_model: "text-embedding-granite-embedding-278m-multilingual"
+llm_embedding_url: "http://127.0.0.1:1234/v1/embeddings"
+llm_embedding_vector_len: 768
+llm_embedding_context_len: 2048
+llm_chat_model: "deepseek-coder-v2-lite-instruct-mlx"
+llm_chat_url: "http://localhost:1234/v1/chat/completions"
+## Memgraph
+memgraph_socket: "localhost:7687"
+memgraph_user: ""
+memgraph_password: ""
+## VECTOR SEARCH
+# Postgresql
+db_name: "test"
+db_user: "postgres"
+db_password: "verdes01"
+db_host: "localhost"
+db_port: "5432"
+k_most_similar: 5
+## Language. Currently only supporting english and french
+language: "en"
+## DATA
+# Local path where PDF files can be found
+pdf_folder_path: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/fake_10"
+# RDF file
+rdf_filepath: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/dot.xml"
+# Additional configuration files
+prompts_xlsx: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/memgraph-pg/additionalFiles/prompts.xlsx"
+examples_xlsx: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/memgraph-pg/additionalFiles/examples.xlsx"
+createTables_sql: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/memgraph-pg/additionalFiles/createTables.sql"
