@@ -6,6 +6,8 @@
 - [Python 3.10](https://www.python.org/downloads/release/python-3100/) Version 3.10.0
 - [LM Studio](https://lmstudio.ai/download) Version 0.3.13 
 - [Memgraph](https://memgraph.com/docs/getting-started/install-memgraph) Version 3.0.1
+- [PostgreSQL](https://www.postgresql.org/download/) Version 16.7
+- [pgvector extension for PostgreSQL](https://github.com/pgvector/pgvector) Version 0.8.0
 - [Damage Ontology Topology](https://alhakam.github.io/dot/) Version 0.8
 
 ## Installation instructions
