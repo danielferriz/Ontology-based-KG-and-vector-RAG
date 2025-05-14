@@ -25,7 +25,7 @@
     * Install [pgvector extension for PostgreSQL](https://github.com/pgvector/pgvector)
 6. [Damage Ontology Topology](https://alhakam.github.io/dot/) xml file
 7. Modify the content of the ```config.yaml``` file to match the files locations and the settings of the additional dependencies
-8. Execute ```python main.py -h``` to display the application help guide
+8. Run ```python main.py -h``` 
 
 ## Pydoc
 This project is fully compatible with Python's ```pydoc``` documentation system, enabling clear and structured access to the underlying codebase. The detailed, low-level implementation of the proposed solution can be explored directly through the generated documentation
