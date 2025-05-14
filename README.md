@@ -21,6 +21,11 @@
     4. Set the context length for LLM to be 8020 in order to support up to 163840 tokens. **Note:** If this value is changed, then the config.yaml file should be updated to the selected context length
 4. Install [Memgraph](https://memgraph.com/docs/getting-started/install-memgraph)
     * Within the installation directory of Memgraph, validate that the file /etc/memgraph/memgraph.conf has the option ```--schema-info-enabled``` set to ```True```. If the option ```--schema-info-enabled``` is set to ```False```, or if it doesn't exist in the configuration file, please adjust it and restart the Memgraph service. For more information, please visit the [Memgraph documentation site](https://memgraph.com/docs/database-management/configuration)
+5. Install [PostgreSQL](https://www.postgresql.org/download/)
+    * Install [pgvector extension for PostgreSQL](https://github.com/pgvector/pgvector)
+6. [Damage Ontology Topology](https://alhakam.github.io/dot/) xml file
+7. Modify the content of the ```config.yaml``` file to match the files locations and the settings of the additional dependencies
+8. Execute ```python main.py -h``` to display the application help guide
 
 ## Pydoc
 This project is fully compatible with Python's ```pydoc``` documentation system, enabling clear and structured access to the underlying codebase. The detailed, low-level implementation of the proposed solution can be explored directly through the generated documentation
