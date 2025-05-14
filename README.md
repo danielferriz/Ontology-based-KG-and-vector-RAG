@@ -23,7 +23,7 @@
     * Within the installation directory of Memgraph, validate that the file /etc/memgraph/memgraph.conf has the option ```--schema-info-enabled``` set to ```True```. If the option ```--schema-info-enabled``` is set to ```False```, or if it doesn't exist in the configuration file, please adjust it and restart the Memgraph service. For more information, please visit the [Memgraph documentation site](https://memgraph.com/docs/database-management/configuration)
 5. Install [PostgreSQL](https://www.postgresql.org/download/)
     * Install [pgvector extension for PostgreSQL](https://github.com/pgvector/pgvector)
-6. [Damage Ontology Topology](https://alhakam.github.io/dot/) xml file
+6. Download the [Damage Ontology Topology](https://alhakam.github.io/dot/) xml file
 7. Modify the content of the ```config.yaml``` file to match the files locations and the settings of the additional dependencies
 8. Run ```python main.py -h``` 
 
