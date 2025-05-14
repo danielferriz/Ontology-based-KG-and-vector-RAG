@@ -4,6 +4,13 @@ from rdf_interface import validate_relation, get_subclass_uri
 import ast
 
 def truncate_graph(graph):
+	"""
+	Truncates KG
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+	"""
+
 	# graph.query("STORAGE MODE IN_MEMORY_ANALYTICAL")
 	# graph.query("DROP GRAPH")
 	# graph.query("STORAGE MODE IN_MEMORY_TRANSACTIONAL")
@@ -21,10 +28,29 @@ RETURN mergedChunk
 
 # ERRORS [201,250]
 def initialize_graph_with_chunk(graph):
+	"""
+	Initializes KG in Memgraph. Error interval: [201,250]
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+
+	Returns:
+		Message Code, and Message Text.
+	"""
 	truncate_graph(graph)
 	return handle_logs(logging_level=logger.DEBUG)
 
 def merge_new_graph_chunk_node(graph, chunk):
+	"""
+	Creates/Merge new KG node in Memgraph
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		dict (chunk): Chunk with metadata
+
+	Returns:
+		Message Code, and Message Text.
+	"""
 	logger.debug(f"Creating `:Chunk` node for chunk ID {chunk['chunkId']}")
 	graph.query(merge_chunk_node_query, 
 		params={
@@ -33,6 +59,16 @@ def merge_new_graph_chunk_node(graph, chunk):
 	return handle_logs(logging_level=logger.DEBUG)
 
 def return_graph_labels(graph):
+	"""
+	Provides a list of current used labels both in nodes, and edges
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+
+	Returns:
+		list (node_labels): Node labels
+		list (edge_labels): Edge labels
+	"""
 	node_labels=[]
 	edge_labels=[]
 	query="MATCH (n) RETURN DISTINCT labels(n);"
@@ -50,6 +86,16 @@ def return_graph_labels(graph):
 	return node_labels, edge_labels
 
 def validate_graph_element(llm_str, approved_list):
+	"""
+	Validates if a string, which might represent either a node label or an edge label, exists within a list of approved labels
+
+	Params:
+		string (llm_str): Label to be analyzed
+		list (approved_list): Valid names list
+
+	Returns:
+		string: Approved name from list, or empty string if no match was found
+	"""
 	if not approved_list or not llm_str:
 		return llm_str
 	for e in approved_list:
@@ -62,6 +108,17 @@ def validate_graph_element(llm_str, approved_list):
 	return "" 
 
 def hierarchy2nodeLabels(label, local2uri, hierarchy):
+	"""
+	Creates a string list of superclasses an ontology class might have
+
+	Params:
+		string (label): Label to be analyzed
+		dict (local2uri): Relation between local name and URI
+		dict (hierarchy): Dictionary that lists, per ontology class, the set of superclass related to that class
+
+	Returns:
+		list (superclasses): Superclasses names list, or None if there was an error during process
+	"""
 	if label not in local2uri.keys():
 		logger.error(f"Unreferenced URI error caused by label: {label}")
 	elif local2uri[label] not in hierarchy.keys():
@@ -76,6 +133,16 @@ def hierarchy2nodeLabels(label, local2uri, hierarchy):
 
 
 def add_superclasses(graph, node, label, local2uri, hierarchy):
+	"""
+	Creates/Merges a new node in KG
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		string (node): Value of 'name' property in new node
+		string (label): Name of node label
+		dict (local2uri): Relation between local name and URI
+		dict (hierarchy): Dictionary that lists, per ontology class, the set of superclass related to that class
+	"""
 	superclasses=hierarchy2nodeLabels(label, local2uri, hierarchy)
 	if superclasses is not None:
 		superclass_query=f"""
@@ -87,6 +154,20 @@ def add_superclasses(graph, node, label, local2uri, hierarchy):
 		graph.query(superclass_query)
 
 def insert_knowledge_graph_nodes_relations(graph, conn, chunk, rdf_graph, rdf_nodes, rdf_edges, local2uri, hierarchy, rel_hierarchy):
+	"""
+	Insert new node from LLM response
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		dict (conn): LLM-detected relation between 2 nodes
+		dict (chunk): Chunk with metadata
+		rdflib.Graph (rdf_graph): Ontology graph
+		list (rdf_nodes): List of possible nodes
+		list (rdf_edges): List of possible edges
+		dict (local2uri): Relation between local name and URI
+		dict (hierarchy): Dictionary that lists, per ontology class, the set of superclass related to that class
+		dict (rel_hierarchy): Dictionary that lists, per ontology relation, the set of superclass related to that relation
+	"""
 	for k in conn.keys():
 		conn[k]=remove_special_chars_in_llm_output(conn[k])
 	head=conn['head']
@@ -181,6 +262,15 @@ def insert_knowledge_graph_nodes_relations(graph, conn, chunk, rdf_graph, rdf_no
 
 
 def return_onProcess_nodes(graph):
+	"""
+	Returns a list of nodes that relate to current analyzed text chunk, i.e., has the 'onProgress' temporary label
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+
+	Returns:
+		list: Nodes that relate to current analyzed text chunk
+	"""
 	query="""
 	MATCH (n)  
 	WHERE n.onProgress IS NOT NULL
@@ -189,6 +279,14 @@ def return_onProcess_nodes(graph):
 	return graph.query(query)
 
 def remove_onProcess_status(graph):
+	"""
+	Per each active node, i.e., nodes with the 'onProgress' temporary label, assigns 
+	an id after any merge/delete KG operations, to the active nodes. Then, it removes
+	any temporary label from the KG
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+	"""
 	query="""
 	MATCH (n)  
 	WHERE n.onProgress IS NULL
@@ -217,6 +315,16 @@ def remove_onProcess_status(graph):
 	graph.query(query)
 
 def recover_label_list_of_subgroup(graph, progressId ):
+	"""
+	Returns a list of labels a node has
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		string (progressId): Node ID
+
+	Returns:
+		list (result): Label nodes
+	"""
 	query=f"""
 	MATCH (n)
 	WHERE n.progressId = '{progressId}'
@@ -231,6 +339,16 @@ def recover_label_list_of_subgroup(graph, progressId ):
 
 
 def combine_similar_group_nodes(graph, rdf_graph, local2uri, hierarchy, similar_groups):
+	"""
+	Combine nodes that represent same subject
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		rdflib.Graph (rdf_graph): Ontology graph
+		dict (local2uri): Relation between local name and URI
+		dict (hierarchy): Dictionary that lists, per ontology class, the set of superclass related to that class
+		dict (similar_groups): Optimal group assignment per node
+	"""
 	try:
 		logger.debug(f"similar_groups: {similar_groups}")
 		for originalTypeGroup in similar_groups.keys():
@@ -304,6 +422,13 @@ def combine_similar_group_nodes(graph, rdf_graph, local2uri, hierarchy, similar_
 		logger.error(f"Error during execution: {ex} in line {ex.__traceback__.tb_lineno}")
 
 def create_new_relations(graph, same_relations):
+	"""
+	Creates relations that were not originally detected by LLM
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		dict (same_relations): Set of similar relations found by LLM
+	"""
 	try:
 		#logger.info(f"same_relations: {same_relations}")
 		for relation in same_relations:
@@ -322,6 +447,18 @@ def create_new_relations(graph, same_relations):
 
 
 def counts_connections_from_a_to_b(graph, headId, relationType, tailId):
+	"""
+	Counts the number of connections that exists between 2 nodes of an specific edge label
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		string (headId): Head node ID
+		string (relationType): Edge label
+		string (tailId): Tail node ID
+
+	Returns:
+		int: Number of connections that exists between 2 nodes of an specific edge label
+	"""
 	try:
 		query=f"""
 		MATCH (n {{progressId:'{headId}'}}) -[r:{relationType}]->(m {{progressId:'{tailId}'}})
@@ -334,6 +471,14 @@ def counts_connections_from_a_to_b(graph, headId, relationType, tailId):
 		return 0
 
 def create_fileNode(graph, filePath, fileId):
+	"""
+	Creates a node that represents the original file from where the current KG was generated from 
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		string (filePath): Absolute path of analyzed file
+		string (fileId): File ID
+	"""
 	try:
 		query=f"""
 		MERGE (m:PdfFile {{fileId: '{fileId}'}})
@@ -346,6 +491,13 @@ def create_fileNode(graph, filePath, fileId):
 		logger.error(f"Error during execution: {ex}")
 
 def linkActiveNodesToFile(graph,  fileId):
+	"""
+	Links active text chunk nodes to the working file node
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+		string (fileId): File ID
+	"""
 	try:
 		query=f"""
 		MATCH (m), (n:PdfFile {{fileId: '{fileId}'}})
@@ -360,6 +512,15 @@ def linkActiveNodesToFile(graph,  fileId):
 		logger.error(f"Error during execution: {ex}")
 
 def return_schema(graph):
+	"""
+	Returns KG schema
+
+	Params:
+		langchain_community.graphs.memgraph_graph.MemgraphGraph (graph): Memgraph knowledge graph
+
+	Returns:
+		string: KG schema, or None if schema retrieval operation failed
+	"""
 	query="SHOW SCHEMA INFO;"
 	try:
 		results=graph.query(query)

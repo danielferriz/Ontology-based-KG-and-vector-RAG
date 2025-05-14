@@ -27,7 +27,7 @@ memgraph_password: ""
 # Postgresql
 db_name: "test"
 db_user: "postgres"
-db_password: "verdes01"
+db_password: "mypostgrespassw"
 db_host: "localhost"
 db_port: "5432"
 k_most_similar: 5
@@ -35,10 +35,11 @@ k_most_similar: 5
 language: "en"
 ## DATA
 # Local path where PDF files can be found
-pdf_folder_path: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/fake_10"
+pdf_folder_path: "/Your/valid/absolute/path/for/your/pdf/files/"
 # RDF file
-rdf_filepath: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/dot.xml"
+rdf_filepath: "/Your/valid/absolute/path/for/your/ontology/dot.xml"
 # Additional configuration files
-prompts_xlsx: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/memgraph-pg/additionalFiles/prompts.xlsx"
-examples_xlsx: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/memgraph-pg/additionalFiles/examples.xlsx"
-createTables_sql: "/Users/liuppa/Documents/ubuntu/Documentos/python3/rag/lm_studio/memgraph-pg/additionalFiles/createTables.sql"
+prompts_xlsx: "/Your/valid/absolute/path/for/your/files/prompts.xlsx"
+examples_xlsx: "/Your/valid/absolute/path/for/your/files/examples.xlsx"
+createTables_sql: "/Your/valid/absolute/path/for/your/files/createTables.sql"
+
